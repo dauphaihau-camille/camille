@@ -1,0 +1,6 @@
+[submodule "apps/api"]
+	path = apps/api
+	url = git@github.com:dauphaihau-camille/api.git
+[submodule "apps/web"]
+	path = apps/web
+	url = https://github.com/dauphaihau-camille/web.git
