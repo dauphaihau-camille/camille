@@ -2,112 +2,79 @@
 
 ## Purpose
 
-This document describes how a document edit moves from browser state to local recovery storage and then to the server.
-
-It documents the current behavior in the web app, not a generic offline-first architecture.
+This document describes the collaborative editing path from the browser Y.Doc through local persistence, cross-tab synchronization, Socket.IO, and PostgreSQL for both BlockNote content and shared document metadata such as title.
 
 ## High-Level Flow
 
 ```mermaid
 flowchart TD
-  A[User edits a document] --> B[Mark page as unsafe to leave]
-  A --> C[Start debounced save pipeline]
-
-  C --> D[Persist local draft]
-  D --> E[Clear hard leave warning]
-  E --> F[Queue remote save]
-  F --> G[Send document update to server]
-  G --> H{Save result}
-
-  H -->|Success| I[Delete local draft]
-  H -->|Success| J[Update in-memory app state]
-  H -->|Failure| K[Keep local draft for recovery]
+  A[User edits in BlockNote] --> B[Y.Doc transaction]
+  B --> C[y-indexeddb]
+  B --> D[BroadcastChannel]
+  B --> E[Authenticated Socket.IO provider]
+  D --> F[Other local tabs]
+  E --> G[Document collaboration gateway]
+  G --> H[Persist Yjs update]
+  H --> I[Broadcast to document room]
+  H --> J[Materialize BlockNote JSON]
+  J --> K[Search, publish, REST reads]
 ```
 
-## Detailed Flows
+## Document Open
 
-### Normal edit and autosave
+1. The browser creates one `Y.Doc` for the document route.
+2. `y-indexeddb` applies locally persisted updates.
+3. A document-scoped BroadcastChannel connects tabs in the same browser.
+4. The Socket.IO provider connects to the `/collaboration` namespace using the HTTP-only access cookie.
+5. The API verifies workspace membership and joins `document:{documentId}`.
+6. The browser sends its Yjs state vector.
+7. The API lazily creates the initial Y.Doc from existing `content_json`, or loads the latest snapshot and update log.
+8. The API returns the server state vector and the update missing from the browser.
+9. The browser calculates its update missing from the server, applies the server update, and sends any offline changes.
+10. The document screen binds shared metadata such as `meta.title` from the synchronized `Y.Map`.
+11. BlockNote mounts with its built-in `collaboration` option and the synchronized `Y.XmlFragment`.
 
-1. The user edits document content in the browser.
-2. The app immediately treats the page as unsafe to leave.
-3. The app debounces edits before starting the save pipeline.
-4. The app writes the newest content to local durable storage as a recovery draft.
-5. After local persistence succeeds, the hard leave warning is removed.
-6. The app queues a remote save using the latest local content.
-7. The app sends the document update to the server.
-8. On success, the local draft is deleted and in-memory app state is refreshed.
-9. On failure, the local draft remains available for recovery.
+BlockNote does not receive `initialContent` in collaboration mode. Existing JSON content is converted with `blocksToYDoc()` only when the server initializes collaboration state for the first time. The server also seeds `meta.title` from `documents.title` during that initialization.
 
-### Refresh or crash before remote save completes
+## Local Edit
 
-1. The local draft has already been persisted.
-2. The remote save has not completed, or the browser exits before completion.
-3. When the document is opened again, the app loads the server version first.
-4. The app then checks once for a recoverable local draft.
-5. If the local draft differs from server content, the app offers to restore it.
+1. Title edits write to `meta.title`; body edits write to the collaborative `Y.XmlFragment`.
+2. Yjs emits a binary update for either kind of change.
+3. `y-indexeddb` persists the update for recovery and offline use.
+4. BroadcastChannel sends the update to other local tabs.
+5. The Socket.IO provider sends the update to the API when connected.
+6. Updates received from BroadcastChannel or Socket.IO use transport-specific origins and are not echoed back.
 
-### Refresh before local persistence completes
+Yjs updates are commutative and idempotent. Duplicate, delayed, and out-of-order delivery converges to the same document.
 
-1. The user edits the document.
-2. The app marks the page as unsafe to leave immediately.
-3. If the user refreshes before local persistence completes, the browser should warn that leaving may lose data.
-4. If the page still exits before local persistence finishes, the newest keystrokes can be lost because no durable local draft exists yet.
+## Remote Update
 
-### Recovery on reopen
+1. The collaboration gateway confirms the socket joined the document room.
+2. The application service rechecks edit permission.
+3. The update is applied to the active server Y.Doc.
+4. The binary update is appended to PostgreSQL with a document sequence and SHA-256 deduplication hash.
+5. The merged Y.Doc is materialized into derived projections for both `meta.title` and BlockNote JSON content.
+6. `documents.title`, `documents.content_json`, search text, and subdocument references are refreshed without replacing the canonical Y.Doc.
+7. Only after persistence succeeds does the gateway broadcast the update to other sockets.
+8. Every 100 updates, the API stores a compact Yjs snapshot and removes covered updates.
 
-```mermaid
-flowchart TD
-  A[Document opens] --> B[Load server document]
-  B --> C[Check local recovery draft once]
-  C --> D{Draft exists?}
+## Offline And Recovery
 
-  D -->|No| E[Render server content]
-  D -->|Yes| F{Draft content matches server content?}
+- IndexedDB stores Yjs updates instead of a replaceable JSON recovery draft.
+- A cached document can open without the API and remains editable.
+- Reconnection uses state vectors to transfer only missing updates in both directions.
+- Recovery prompts and latest-wins content saves are disabled for collaborative documents.
+- Awareness and cursor state are ephemeral and expire when clients stop sending updates.
 
-  F -->|Yes| G[Delete stale draft silently]
-  G --> E
+## Canonical And Derived State
 
-  F -->|No| H{Draft based on older server version?}
-  H -->|No| I[Show restore prompt]
-  H -->|Yes| J[Show conflict-style restore prompt]
+- Yjs snapshots plus updates are canonical document state.
+- `meta.title` inside the Y.Doc is the canonical document title.
+- `documents.title` and `documents.content_json` are derived projections used by existing REST reads, search, publishing, and navigation summaries.
+- Normal REST document updates reject content replacement after collaborative state exists.
+- Archive state, permissions, hierarchy, and other metadata continue to use REST optimistic locking.
+- Subdocument commands remain REST workflows, but successful editor changes are committed into the Y.Doc so projection converges with command results.
 
-  I --> K{User accepts?}
-  J --> K
-  K -->|Yes| L[Restore local draft]
-  K -->|No| M[Delete draft and keep server content]
-```
+## Current Operational Boundary
 
-### Conflict and prompt behavior
-
-- If local draft content matches server content, the draft is deleted silently.
-- If local draft content differs and was created from the current known server version, the app shows a normal restore prompt.
-- If local draft content differs and was created from an older server version, the app shows a conflict-style restore prompt.
-- Recovery is checked once per document open so normal rerenders do not repeatedly prompt.
-
-## Key Guarantees
-
-- The server is the source of truth for canonical document state.
-- Local browser storage is a recovery layer, not the primary document store.
-- Content saves use a latest-wins approach rather than sending every intermediate edit.
-- The browser warns if the user tries to leave before local persistence completes.
-- A successfully saved document clears its local recovery draft.
-
-## Known Limitations
-
-- The last keystroke can still be lost if the browser exits before local persistence finishes.
-- The current implementation supports draft recovery, not a full offline mutation outbox.
-- There is no multi-device merge strategy yet.
-- Conflict handling is prompt-based, not an automatic merge flow.
-
-## Terms Used In This Doc
-
-- **Local draft**: the most recent recoverable document content stored in the browser
-- **Remote save**: the request that persists document content to the server
-- **Unsafe to leave**: the window where exiting the page may still lose the newest local changes
-- **Recovery**: restoring locally persisted content after refresh, crash, or restart
-
-## Suggested Follow-up Docs
-
-- Architecture Decision Record for why local browser persistence was added
-- Offline and recovery edge cases
-- Future outbox and conflict resolution design if offline editing grows
+Active Y.Docs and Socket.IO rooms are process-local. A multi-instance API deployment requires a Socket.IO Redis adapter or equivalent pub/sub so updates broadcast across instances. PostgreSQL update sequencing remains the durable source for reconnect synchronization.
