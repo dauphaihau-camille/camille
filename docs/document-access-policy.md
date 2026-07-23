@@ -22,7 +22,7 @@ Document access is resolved to a capability set:
 ```
 
 The resolver combines ownership, workspace role, teamspace role, direct document
-grants, and workspace-member access settings.
+grants, inherited ancestor document grants, and workspace-member access settings.
 
 ## Access Scope
 
@@ -48,6 +48,10 @@ Teamspace scope takes precedence over shared scope.
 | Direct document grant `edit` | `edit` |
 | Direct document grant `comment` | `view` |
 | Direct document grant `view` | `view` |
+| Ancestor document grant `manage` | `manage` |
+| Ancestor document grant `edit` | `edit` |
+| Ancestor document grant `comment` | `view` |
+| Ancestor document grant `view` | `view` |
 | Workspace-member setting `manage` | `manage` |
 | Workspace-member setting `edit` | `edit` |
 | Workspace-member setting `comment` | `view` |
@@ -89,6 +93,8 @@ manage > edit > view > none
   it to `view` because the resolver does not expose a separate comment capability.
 - Workspace owners/admins are not global document managers for private documents
   through the resolver unless another source grants access.
+- Active direct grants on an ancestor document apply to descendants. The
+  strongest applicable grant wins when direct and ancestor grants both apply.
 - The resolver returns policy decisions from the context it receives. API behavior
   depends on callers loading and passing the relevant grant, setting, ownership,
   workspace, and teamspace data.
