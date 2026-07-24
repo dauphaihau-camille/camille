@@ -3,6 +3,21 @@ A note-taking web application where you can think, write, and plan.
 
 This repository is the parent workspace for the Camille project. The application code lives in separate Git submodules so each app keeps its own history and remote repository.
 
+## Product Capabilities
+
+- **Realtime collaboration** - multiple users can edit the same document with shared document state and live presence foundations
+- **Block-based documents** - documents are stored as structured editor blocks instead of raw HTML
+- **Nested documents** - documents can contain subdocuments, allowing page-within-page organization
+- **Offline-first editing foundation** - local editor state can survive reloads and temporary disconnection
+- **Sync queue and stale-write protection** - saves are ordered so older responses cannot overwrite newer edits
+- **Workspace document tree** - documents are organized by workspace, teamspace, parent-child hierarchy, favorites, and trash
+- **Public document sharing** - selected documents can be published through share routes
+- **Workspace access control** - document visibility and editing are controlled by workspace, teamspace, inherited grants, and roles
+- **Full-text document search** - users can search workspace documents by title and body content
+- **Optimistic document actions** - common actions update immediately in the UI and roll back if the request fails
+- **Resumable workspace navigation** - the app remembers the user’s last active workspace and expanded document tree state
+- **Multiple sign-in flows** - users can sign up or log in with password, email code, Google OAuth, or GitHub OAuth
+
 ## Tech stack
 
 #### Frontend:
