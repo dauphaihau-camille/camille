@@ -16,7 +16,7 @@ This repository is the parent workspace for the Camille project. The application
 - **Full-text document search** - users can search workspace documents by title and body content
 - **Optimistic document actions** - common actions update immediately in the UI and roll back if the request fails
 - **Resumable workspace navigation** - the app remembers the user’s last active workspace and expanded document tree state
-- **Multiple sign-in flows** - users can sign up or log in with password, email code, Google OAuth, or GitHub OAuth
+- **Multiple sign-in flows** - users can sign up or log in with email codes, Google OAuth, or GitHub OAuth
 
 &nbsp;
 
