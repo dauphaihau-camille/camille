@@ -1,8 +1,6 @@
 # Camille
 A note-taking web application where you can think, write, and plan.
 
-This repository is the parent workspace for the Camille project. The application code lives in separate Git submodules so each app keeps its own history and remote repository.
-
 ## Product Capabilities
 
 - **Realtime collaboration** - multiple users can edit the same document with shared document state and live presence foundations
@@ -49,16 +47,13 @@ For deeper implementation details, see the frontend and backend capability inven
 - [TypeScript](https://www.typescriptlang.org/) - Static type checking
 - [Zod](https://zod.dev/) - Schema validation
 
-## Features
-- Collaborative workspace parent repository
-- Separate frontend and backend repositories managed as Git submodules
-- Frontend app in [apps/web](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web)
-- Backend app in [apps/api](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/api)
+## Workspace Structure
 
-## Repositories
+This repository is the parent workspace for the Camille project. The application code lives in separate Git submodules so each app keeps its own history and remote repository.
+
 - Parent workspace: [dauphaihau-camille/camille](https://github.com/dauphaihau-camille/camille)
-- Frontend: [dauphaihau-camille/web](https://github.com/dauphaihau-camille/web)
-- Backend: [dauphaihau-camille/api](https://github.com/dauphaihau-camille/api)
+- Frontend app: [apps/web](apps/web) - [dauphaihau-camille/web](https://github.com/dauphaihau-camille/web)
+- Backend app: [apps/api](apps/api) - [dauphaihau-camille/api](https://github.com/dauphaihau-camille/api)
 
 ## Setup
 ```bash
