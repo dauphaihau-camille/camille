@@ -16,8 +16,6 @@ A note-taking web application where you can think, write, and plan.
 - **Resumable workspace navigation** - the app remembers the user’s last active workspace and expanded document tree state
 - **Multiple sign-in flows** - users can sign up or log in with email codes, Google OAuth, or GitHub OAuth
 
-&nbsp;
-
 For deeper implementation details, see the frontend and backend capability inventories:
 
 - [Frontend implemented patterns and capabilities](apps/web/README.md#implemented-patterns-and-capabilities)
