@@ -7,7 +7,7 @@ This repository is the parent workspace for the Camille project. The application
 
 - **Realtime collaboration** - multiple users can edit the same document with shared document state and live presence foundations
 - **Block-based documents** - documents are stored as structured editor blocks instead of raw HTML
-- **Nested documents** - documents can contain subdocuments, allowing page-within-page organization
+- **Nested documents** - documents can contain subdocuments, allowing doc-within-doc organization
 - **Offline-first editing foundation** - local editor state can survive reloads and temporary disconnection
 - **Sync queue and stale-write protection** - saves are ordered so older responses cannot overwrite newer edits
 - **Workspace document tree** - documents are organized by workspace, teamspace, parent-child hierarchy, favorites, and trash
@@ -17,6 +17,13 @@ This repository is the parent workspace for the Camille project. The application
 - **Optimistic document actions** - common actions update immediately in the UI and roll back if the request fails
 - **Resumable workspace navigation** - the app remembers the user’s last active workspace and expanded document tree state
 - **Multiple sign-in flows** - users can sign up or log in with password, email code, Google OAuth, or GitHub OAuth
+
+&nbsp;
+
+For deeper implementation details, see the frontend and backend capability inventories:
+
+- [Frontend implemented patterns and capabilities](apps/web/README.md#implemented-patterns-and-capabilities)
+- [Backend implemented patterns and capabilities](apps/api/README.md#implemented-patterns-and-capabilities)
 
 ## Tech stack
 
