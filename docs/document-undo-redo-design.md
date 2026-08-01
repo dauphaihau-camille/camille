@@ -64,14 +64,14 @@ flowchart TD
 ```mermaid
 sequenceDiagram
   participant User
-  participant Title as Title Input
+  participant TitleInput as Title Input
   participant Body as BlockNote
   participant Undo as Yjs UndoManager
   participant Doc as Y.Doc
   participant Sync as Persistence And Sync
 
-  User->>Title: Type title
-  Title->>Doc: transact meta.title with local origin
+  User->>TitleInput: Type title
+  TitleInput->>Doc: transact meta.title with local origin
   Doc->>Undo: capture eligible local title edit
   Doc->>Sync: emit ordinary Yjs update
 
