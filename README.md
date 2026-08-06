@@ -1,6 +1,19 @@
 # Camille
 A note-taking web application where you can think, write, and plan.
 
+![Camille app workspace](./assets/screenshots/app-workspace.png)
+[See more app screenshots](./docs/app-screenshots.md)
+
+## Demo
+
+| App | Deployed | Local |
+| --- | --- | --- |
+| App | `https://app.camille.hautran.me` | `http://localhost:4000` |
+| Marketing | `https://camille.hautran.me` | `http://localhost:4001` |
+| API Docs | `https://api.camille.hautran.me` | `http://localhost:3000/docs` |
+
+- [Demo guide](./docs/demo-guide.md) - demo accounts, seed modes, smoke checks, and safe test flows.
+
 ## Product Capabilities
 
 - **Realtime collaboration** - multiple users can edit the same document with shared document state and live presence foundations
@@ -54,11 +67,14 @@ This repository is the parent workspace for the Camille project. The application
 - Backend app: [apps/api](apps/api) - [dauphaihau-camille/api](https://github.com/dauphaihau-camille/api)
 
 ## Setup
+
 ```bash
 git clone --branch production --recurse-submodules git@github.com:dauphaihau-camille/camille.git
 cd camille
 git submodule update --init --recursive
 ```
+
+- [Local setup](./docs/local-setup.md) - install dependencies, seed demo data, and run the API, worker, app, and marketing site locally.
 
 ## Contact
 
