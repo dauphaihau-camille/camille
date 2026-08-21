@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage: ./tools/agent/repo-map <topic>
+
+Topics:
+  auth
+  document
+  document-edit
+  favorite
+  publish
+  search
+  teamspace
+  workspace
+  workspace-preference
+USAGE
+}
+
+common_api_guidance() {
+  cat <<'EOF'
+API guidance:
+  apps/api/api/AGENTS.md
+  apps/api/api/agent-skills/common-rules.md
+  apps/api/api/agent-skills/src-structure.md
+  apps/api/api/agent-skills/http-api-conventions.md
+  apps/api/api/agent-skills/layered-error-model.md
+  apps/api/api/agent-skills/cross-domain-boundaries.md
+  apps/api/api/agent-skills/repository-conventions.md
+  apps/api/api/agent-skills/use-case-boundaries.md
+  apps/api/api/agent-skills/testing.md
+EOF
+}
+
+common_web_guidance() {
+  cat <<'EOF'
+Web guidance:
+  apps/web/AGENTS.md
+  apps/web/agent-skills/co-located-files.md
+  apps/web/agent-skills/clean-react-comopnent.md
+EOF
+}
+
+print_topic() {
+  local title="$1"
+  local docs="$2"
+  local api="$3"
+  local web="$4"
+  local verify="$5"
+
+  printf '%s\n\n' "$title"
+
+  if [[ -n "$docs" ]]; then
+    printf 'Docs:\n%s\n\n' "$docs"
+  fi
+
+  if [[ -n "$api" ]]; then
+    printf 'API surfaces:\n%s\n\n' "$api"
+    common_api_guidance
+    printf '\n'
+  fi
+
+  if [[ -n "$web" ]]; then
+    printf 'Web surfaces:\n%s\n\n' "$web"
+    common_web_guidance
+    printf '\n'
+  fi
+
+  printf 'Verification:\n%s\n' "$verify"
+}
+
+topic="${1:-}"
+
+case "$topic" in
+  auth)
+    print_topic \
+      "Auth" \
+      "" \
+      "  apps/api/api/src/domains/auth" \
+      "  apps/web/apps/app/src/app/(auth)
+  apps/web/apps/app/src/domains/auth" \
+      "  ./scripts/verify api
+  ./scripts/verify app"
+    ;;
+  document)
+    print_topic \
+      "Document" \
+      "  docs/features/document-access-policy.md
+  docs/features/document-edit-flow.md
+  docs/features/document-undo-redo-design.md
+  docs/adr/0001-use-yjs-level-session-undo-for-document-editing.md" \
+      "  apps/api/api/src/domains/document" \
+      "  apps/web/apps/app/src/domains/document
+  apps/web/packages/shared/src/components/editor" \
+      "  ./scripts/verify api
+  ./scripts/verify app
+  ./scripts/verify shared"
+    ;;
+  document-edit)
+    print_topic \
+      "Document Edit" \
+      "  docs/features/document-edit-flow.md
+  docs/features/document-undo-redo-design.md
+  docs/adr/0001-use-yjs-level-session-undo-for-document-editing.md" \
+      "  apps/api/api/src/domains/document
+  apps/api/api/src/platform/ws
+  apps/api/api/src/platform/sse" \
+      "  apps/web/apps/app/src/domains/document
+  apps/web/packages/shared/src/components/editor" \
+      "  ./scripts/verify api
+  ./scripts/verify app
+  ./scripts/verify shared"
+    ;;
+  favorite)
+    print_topic \
+      "Favorite" \
+      "" \
+      "  apps/api/api/src/domains/favorite" \
+      "  apps/web/apps/app/src/domains/favorite" \
+      "  ./scripts/verify api
+  ./scripts/verify app"
+    ;;
+  publish)
+    print_topic \
+      "Publish" \
+      "" \
+      "  apps/api/api/src/domains/publish" \
+      "  apps/web/apps/marketing/src/app/share
+  apps/web/packages/shared/src/domains/publish" \
+      "  ./scripts/verify api
+  ./scripts/verify marketing
+  ./scripts/verify shared"
+    ;;
+  search)
+    print_topic \
+      "Search" \
+      "" \
+      "  apps/api/api/src/domains/search" \
+      "  apps/web/apps/app/src/domains/search" \
+      "  ./scripts/verify api
+  ./scripts/verify app"
+    ;;
+  teamspace)
+    print_topic \
+      "Teamspace" \
+      "" \
+      "  apps/api/api/src/domains/teamspace" \
+      "  apps/web/apps/app/src/domains/teamspace" \
+      "  ./scripts/verify api
+  ./scripts/verify app"
+    ;;
+  workspace)
+    print_topic \
+      "Workspace" \
+      "" \
+      "  apps/api/api/src/domains/workspace" \
+      "  apps/web/apps/app/src/app/workspace
+  apps/web/apps/app/src/app/w
+  apps/web/apps/app/src/domains/workspace
+  apps/web/packages/shared/src/domains/workspace" \
+      "  ./scripts/verify api
+  ./scripts/verify app
+  ./scripts/verify shared"
+    ;;
+  workspace-preference)
+    print_topic \
+      "Workspace Preference" \
+      "" \
+      "  apps/api/api/src/domains/workspace-preference" \
+      "  apps/web/apps/app/src/domains/workspace-preference" \
+      "  ./scripts/verify api
+  ./scripts/verify app"
+    ;;
+  -h|--help|help|"")
+    usage
+    ;;
+  *)
+    echo "Unknown repo-map topic: $topic" >&2
+    echo >&2
+    usage >&2
+    exit 2
+    ;;
+esac

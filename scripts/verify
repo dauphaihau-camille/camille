@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+usage() {
+  cat <<'USAGE'
+Usage: ./scripts/verify [target]
+
+Targets:
+  all        Run the default API and web verification checks
+  api        Run NestJS API lint, typecheck, and unit tests
+  web        Run web monorepo typecheck, lint, and tests
+  app        Run the main web app typecheck
+  marketing  Run the marketing app typecheck
+  shared     Run the shared web package typecheck
+  e2e        Run the main web app Playwright tests
+
+Default target: all
+USAGE
+}
+
+run_api() {
+  cd "$ROOT_DIR/apps/api/api"
+  pnpm check
+}
+
+run_web() {
+  cd "$ROOT_DIR/apps/web"
+  bun run check
+}
+
+run_app() {
+  cd "$ROOT_DIR/apps/web"
+  bun run typecheck:app
+}
+
+run_marketing() {
+  cd "$ROOT_DIR/apps/web"
+  bun run typecheck:marketing
+}
+
+run_shared() {
+  cd "$ROOT_DIR/apps/web"
+  bun run typecheck:shared
+}
+
+run_e2e() {
+  cd "$ROOT_DIR/apps/web"
+  bun run test:e2e
+}
+
+target="${1:-all}"
+
+case "$target" in
+  all)
+    run_api
+    run_web
+    ;;
+  api)
+    run_api
+    ;;
+  web)
+    run_web
+    ;;
+  app)
+    run_app
+    ;;
+  marketing)
+    run_marketing
+    ;;
+  shared)
+    run_shared
+    ;;
+  e2e)
+    run_e2e
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Unknown verification target: $target" >&2
+    echo >&2
+    usage >&2
+    exit 2
+    ;;
+esac
