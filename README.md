@@ -2,7 +2,7 @@
 A note-taking web application where you can think, write, and plan.
 
 ![Camille app workspace](./assets/screenshots/app-workspace.png)
-[See more app screenshots](./docs/app-screenshots.md)
+[See more app screenshots](./docs/screenshots/app-screenshots.md)
 
 ## Demo
 
