@@ -13,3 +13,15 @@ repository search.
 Use `./scripts/verify` from the repository root for the default verification
 path, or pass a focused target such as `api`, `web`, `app`, `marketing`, or
 `shared`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs are tracked in GitHub Issues for `dauphaihau-camille/camille`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+This repo uses a multi-context domain-doc layout: root `CONTEXT-MAP.md`,
+context-specific `CONTEXT.md` files under `docs/domain/`, and root
+`docs/adr/`. See `docs/agents/domain.md`.

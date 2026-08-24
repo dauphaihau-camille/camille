@@ -55,6 +55,21 @@ Recommended screenshot flow:
 - Open `AI Product` and confirm the sidebar child order matches the page's `Related Pages` order: `Q3 Roadmap`, `Search Quality Spec`, `Launch Brief`, `Prompt Library`, `Tool Use Rules`, `Beta Feedback`, `Assistant UX`.
 - Capture the sidebar with `Favorites`, `Private`, `Teamspaces`, and `Shared` visible.
 
+## Billing Demo Data
+
+Use the realistic seed for subscription and upgrade-prompt checks.
+
+| Workspace | Account | Seeded State | Best For |
+| --- | --- | --- | --- |
+| `Camille AI` | `maya.chen@example.com` | Plus active | Billing tab happy path, seat count, and owner cancellation action. |
+| `Northstar GTM AI` | `nina.patel@example.com` | Free collaborative | Free plan block limit and upgrade CTA. |
+| `Camille AI 2` | `maya.chen@example.com` | Plus canceling | Cancellation scheduled state. |
+| `Northstar GTM AI 2` | `nina.patel@example.com` | Plus past due | Past-due status display while Plus entitlements still apply. |
+| `Seeded Block Limit Lab` | `maya.chen@example.com` | Free collaborative at 1,000 blocks | Creating one more document block should return `workspace_block_limit_reached` and show the Upgrade prompt. |
+| `Seeded Over Limit Lab` | `maya.chen@example.com` | Free collaborative at 1,200 blocks | Downgrade-style over-limit checks: existing content remains available, but new block creation is denied. |
+
+Seeded billing provider IDs are deterministic fake Stripe IDs. They are intended for local/demo UI and API checks, not real Stripe reconciliation.
+
 ### Public And Guest Testing
 
 No login account is needed for public marketing and shared-document checks.
