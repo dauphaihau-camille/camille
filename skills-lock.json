@@ -7,6 +7,12 @@
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
       "computedHash": "0f843160e34a24f5bd12cdc7de7d40951e77fbdc05ce8f891b37ca32eac2c44d"
     },
+    "commit-group": {
+      "source": "dauphaihau/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/utilities/commit-group/SKILL.md",
+      "computedHash": "7e2040429cebdcec364467c42cba8843990594b873d81138dff90b9e528e2719"
+    },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
       "sourceType": "github",
