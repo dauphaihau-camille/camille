@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "typescript-language-server": {
+      "rootMarkers": [
+        "apps/web/tsconfig.json",
+        "apps/api/api/tsconfig.json"
+      ],
+      "args": ["--stdio"]
+    }
+  }
+}
