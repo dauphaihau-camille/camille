@@ -55,20 +55,32 @@ Recommended screenshot flow:
 - Open `AI Product` and confirm the sidebar child order matches the page's `Related Pages` order: `Q3 Roadmap`, `Search Quality Spec`, `Launch Brief`, `Prompt Library`, `Tool Use Rules`, `Beta Feedback`, `Assistant UX`.
 - Capture the sidebar with `Favorites`, `Private`, `Teamspaces`, and `Shared` visible.
 
+
+## AI Chat Demo Data
+
+Use the realistic seed for local AI chat checks. Completed short demo turns count as consumed AI responses, matching Notion-style response counting. The long history session is intentionally excluded from usage counting so it can test cursor pagination without exhausting the main Camille AI workspace.
+
+| Workspace | Account | Demo Sessions | Counted Responses | Best For |
+| --- | --- | --- | --- | --- |
+| `Camille AI` | `maya.chen@example.com` | `Launch readiness summary`, `Evaluation risks review`, `Untitled`, `Long pagination history` | 4 counted; long history excluded | Default `New AI chat` trigger, persisted turns, realistic document attachments, remaining-usage checks, and cursor pagination by scrolling the long session upward. |
+| `Northstar GTM AI` | `nina.patel@example.com` | `Account health recap`, `GTM launch brief` | 3 counted | GTM-focused persisted conversations, document attachment checks, and partial AI usage state. |
+| `Northstar GTM AI` | `maya.chen@example.com` | `Northstar GTM review`, `Northstar customer intelligence` | 3 counted | Cross-workspace reviewer checks for Maya, per-user conversation visibility, and shared workspace usage counting. |
+
 ## Billing Demo Data
 
 Use the realistic seed for subscription and upgrade-prompt checks.
 
-| Workspace | Account | Seeded State | Best For |
+| Workspace | Account | Demo State | Best For |
 | --- | --- | --- | --- |
 | `Camille AI` | `maya.chen@example.com` | Plus active | Billing tab happy path, seat count, and owner cancellation action. |
 | `Northstar GTM AI` | `nina.patel@example.com` | Free collaborative | Free plan block limit and upgrade CTA. |
 | `Camille AI 2` | `maya.chen@example.com` | Plus canceling | Cancellation scheduled state. |
 | `Northstar GTM AI 2` | `nina.patel@example.com` | Plus past due | Past-due status display while Plus entitlements still apply. |
-| `Seeded Block Limit Lab` | `maya.chen@example.com` | Free collaborative at 1,000 blocks | Creating one more document block should return `workspace_block_limit_reached` and show the Upgrade prompt. |
-| `Seeded Over Limit Lab` | `maya.chen@example.com` | Free collaborative at 1,200 blocks | Downgrade-style over-limit checks: existing content remains available, but new block creation is denied. |
+| `Block Limit Lab` | `maya.chen@example.com` | Free collaborative at 1,000 blocks | Creating one more document block should return `workspace_block_limit_reached` and show the Upgrade prompt. |
+| `Over Limit Lab` | `maya.chen@example.com` | Free collaborative at 1,200 blocks | Downgrade-style over-limit checks: existing content remains available, but new block creation is denied. |
+| `AI Trial Limit Lab` | `maya.chen@example.com` | Free collaborative with AI trial responses exhausted | Sending the next AI prompt should return `403` with `remaining_responses: 0` and show the AI upgrade prompt. |
 
-Seeded billing provider IDs are deterministic fake Stripe IDs. They are intended for local/demo UI and API checks, not real Stripe reconciliation.
+Demo billing provider IDs are deterministic fake Stripe IDs. They are intended for local/demo UI and API checks, not real Stripe reconciliation.
 
 ### Public And Guest Testing
 

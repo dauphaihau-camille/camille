@@ -1,0 +1,3 @@
+# Retain AI Source Snapshots Only As Operational Metadata
+
+Camille's first AI assistant stores user-private AI Conversation Sessions with user messages and assistant responses as product state. Camille does not persist raw AI Transform Source Snapshot text or generated transform draft text as hidden prompt history; source snapshots are used to generate responses and represented afterward by operational metadata such as user, workspace id, document attachment ids, intent, status, timestamps, token counts, cost counts, source snapshot token, conversation session id, assistant message id, and AI append action type. This preserves useful chat history while keeping document source copies and unapplied transform drafts out of long-lived retention by default.

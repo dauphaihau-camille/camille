@@ -7,6 +7,7 @@ Usage: ./tools/agent/repo-map <topic>
 
 Topics:
   auth
+  ai-assistance
   document
   document-edit
   favorite
@@ -82,6 +83,38 @@ case "$topic" in
   apps/web/apps/app/src/domains/auth" \
       "  ./scripts/verify api
   ./scripts/verify app"
+    ;;
+  ai-assistance)
+    print_topic \
+      "AI Assistance" \
+      "  docs/features/ai-assistance/README.md
+  docs/features/ai-assistance/flow.md
+  docs/features/ai-assistance/flows/session-lifecycle.md
+  docs/features/ai-assistance/flows/document-context.md
+  docs/features/ai-assistance/flows/streaming-response.md
+  docs/features/ai-assistance/flows/append-to-document.md
+  docs/features/ai-assistance/flows/billing-and-retention.md
+  docs/domain/ai-assistance/CONTEXT.md
+  docs/domain/document-editing/CONTEXT.md
+  docs/domain/subscription-plans/CONTEXT.md
+  docs/adr/0003-retain-ai-transform-metadata-only.md
+  docs/adr/0004-use-workspace-ai-trial-pool-for-ai-billing.md" \
+      "  apps/api/api/src/domains/ai-assistance
+  apps/api/api/src/integrations/ai
+  apps/api/api/src/domains/document
+  apps/api/api/src/domains/subscription
+  apps/api/api/src/platform/config/ai.config.ts
+  apps/api/api/src/platform/application/cursor-pagination.ts" \
+      "  apps/web/apps/app/src/app/w/[workspaceSlug]/_components/ai-chat-panel
+  apps/web/apps/app/src/app/w/[workspaceSlug]/_components/workspace-ai-chat-shell.tsx
+  apps/web/apps/app/src/app/w/[workspaceSlug]/(workspace)/[documentId]/_components/document-screen
+  apps/web/apps/app/src/components/ui/message-scroller.tsx
+  apps/web/packages/shared/src/components/editor
+  apps/web/packages/shared/src/components/ui" \
+      "  ./scripts/verify api
+  ./scripts/verify app
+  ./scripts/verify shared
+  ./scripts/verify e2e"
     ;;
   document)
     print_topic \

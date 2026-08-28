@@ -53,6 +53,7 @@ Examples:
 ./tools/agent/repo-map document
 ./tools/agent/repo-map document-edit
 ./tools/agent/repo-map auth
+./tools/agent/repo-map ai-assistance
 ./tools/agent/repo-map workspace
 ./tools/agent/repo-map publish
 ```
@@ -123,7 +124,7 @@ Camille currently has the first practical harness layer:
 
 - layered `AGENTS.md` routing
 - API and web focused guidance
-- repo-map topics for major feature areas
+- repo-map topics for major feature areas, including AI Assistance
 - root verification commands
 
 The next maturity step is to expand executable checks gradually as existing
