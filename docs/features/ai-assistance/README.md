@@ -1,6 +1,6 @@
 # AI Assistance
 
-Camille AI Assistance is a workspace chat surface with optional explicit document attachments. The first release supports user-private AI conversation sessions, attached-document summarize behavior, streaming assistant responses, AI trial-pool gating, and appending completed assistant responses to the active editable document.
+Camille AI Assistance is a workspace chat surface with optional explicit document attachments. The first release supports user-private AI conversation sessions, attached-document summarize behavior, structured streaming assistant responses, AI trial-pool gating, and appending completed assistant response block payloads to the active editable document.
 
 AI Assistance is not workspace retrieval, autonomous editing, selected-text editing, or a document-only transform endpoint. The product boundary is explicit user action: AI can generate a response or draft, but document content changes only when the user applies or appends generated content.
 
@@ -20,7 +20,7 @@ AI Assistance is not workspace retrieval, autonomous editing, selected-text edit
 - User-private AI Conversation Sessions, AI Chat Turns, persisted user messages, and persisted assistant responses.
 - Optional AI Document Attachments from the active document route.
 - Attached-document summarize as the first AI Text Transform behavior.
-- Streaming AI Responses.
+- Structured Streaming AI Responses.
 - AI Conversation Title generation or derivation after the first successful assistant response.
 - AI Conversation Grouping by recent activity.
 - Subscription Plans AI Response Gate, Workspace AI Trial Pool reservation, consumption, release, and expiry.
@@ -35,7 +35,7 @@ AI Assistance is not workspace retrieval, autonomous editing, selected-text edit
 - External document collaborators or public viewers using Workspace AI Chat.
 - Selected-text AI actions or selection-toolbar AI.
 - Cursor insertion, selected-range replacement, or automatic document edits.
-- Full Markdown import, rich provider-owned document JSON, embeds, mentions, comments, or complex editor state.
+- Full Markdown import, rich provider-owned document JSON, embeds, mentions, comments, or complex editor state beyond the backend-normalized basic response block payload.
 - Implemented translate behavior. Translate remains a disabled Pending Translation Action until target-language selection and replace-body apply behavior are designed.
 - Storing raw prompt/source snapshots or unapplied generated transform draft text as long-lived hidden history.
 - Plus Plan as ongoing AI access after the trial pool is exhausted.

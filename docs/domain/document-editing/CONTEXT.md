@@ -103,8 +103,8 @@ _Avoid_: Empty-stack notice, read-only shortcut notice
 - Applying AI Assistance generated content creates an **AI-Assisted Document Edit** only when the user explicitly inserts, appends, or replaces content in an **Editing Surface**.
 - An AI Assistance **AI Append Action** creates an **AI-Assisted Document Edit** by appending assistant response content to the end of the current **Document Body**.
 - An AI Assistance **AI Append Action** is allowed only during an **Editable Session** for the active document.
-- An AI Assistance **AI Append Action** converts assistant response Markdown-lite into supported basic document blocks before writing to the editor; unsupported syntax is inserted as text.
-- An AI Assistance **AI Append Action** writes only completed persisted assistant messages, not partial streaming text.
+- An AI Assistance **AI Append Action** writes the completed reconciled **AI Response Block Payload** as supported basic document blocks; unsupported Markdown-lite syntax is preserved as text inside supported blocks.
+- An AI Assistance **AI Append Action** writes only completed persisted assistant messages, not partial streaming block events or assistant message previews.
 - Repeating an AI Assistance **AI Append Action** creates another **AI-Assisted Document Edit**; Camille does not track one-time insertion state per assistant message.
 - AI Assistance **AI Append Action** is not blocked by source snapshot staleness because it appends new content rather than replacing existing source content.
 - AI Assistance **AI Append Action** targets the current active document, not necessarily the document attachment that originally informed the assistant response.
@@ -124,8 +124,8 @@ _Avoid_: Empty-stack notice, read-only shortcut notice
 - "AI applies the result" means the user applies AI Assistance generated content explicitly; the AI does not immediately replace, append, or create document content.
 - "Append to this document" means append the selected AI Assistance response to the end of the current active **Document Body** during an **Editable Session**, not the originally attached document, cursor insertion, or selected-range replacement.
 - "Apply AI draft" means the web editor writes ordinary collaborative Yjs changes with AI provenance, not that the backend rewrites document content.
-- "AI append format" means supported basic document blocks produced from Markdown-lite, not full rich markdown import or provider-owned document JSON.
-- "Append during streaming" is rejected; partial assistant text is not eligible for a **Document Edit**.
+- "AI append format" means supported basic document blocks from a completed reconciled **AI Response Block Payload**, not full rich markdown import or provider-owned document JSON.
+- "Append during streaming" is rejected; partial assistant block events and read-only assistant message previews are not eligible for a **Document Edit**.
 - "Repeat AI append" means another explicit **Document Edit**, not a blocked duplicate.
 - "Stale AI append" is rejected; source drift blocks targeted transform apply, not append-to-end.
 - "AI append provenance" means metadata that can trace the source chat message, not visible watermarking or hidden full prompt/source retention.

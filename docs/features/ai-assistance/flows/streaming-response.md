@@ -14,19 +14,19 @@ sequenceDiagram
   Member->>Panel: Submit chat or summarize action
   Panel->>API: Start AI Chat Turn
   API->>Provider: Generate response
-  Provider-->>API: Stream response chunks
-  API-->>Panel: Streaming AI Response
-  Panel-->>Member: Render partial assistant text
+  Provider-->>API: Stream raw response chunks
+  API-->>Panel: Stream block_start/text_delta/block_end events
+  Panel-->>Member: Render partial assistant block preview
   Provider-->>API: Completed output
-  API->>Store: Persist valid completed turn
+  API->>Store: Persist valid turn, assistant text, and block payload
   API->>Billing: Consume reservation after persistence
-  API-->>Panel: Completed persisted assistant message
+  API-->>Panel: Completed persisted assistant message with reconciled block payload
 ```
 
 Summary:
 
 - streaming is response delivery for an AI Chat Turn, not a background job
-- partial streaming text is visible but cannot be appended
-- append and copy actions use completed persisted assistant messages
+- partial streaming block previews are visible but cannot be appended
+- append uses the completed persisted response block payload; copy uses completed assistant text
 - invalid generated output shows a retryable failure notice
 - failed, canceled, or interrupted streams do not consume trial access unless a valid response was persisted

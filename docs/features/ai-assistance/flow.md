@@ -7,7 +7,7 @@ This document is the top-level implementation map for Camille AI Assistance. Det
 - Workspace-level AI shell opens the AI Chat Panel.
 - Document route registers the active document as removable AI Document Context while mounted.
 - AI Chat Panel Action starts an AI Chat Turn or AI Text Transform.
-- Assistant message action labeled `Append to this document` appends a completed persisted assistant response to the active editable document.
+- Assistant message action labeled `Append to this document` appends a completed persisted assistant response block payload to the active editable document.
 - Pending translate action is visible but disabled with coming-soon copy.
 
 ## Main Flow
@@ -23,8 +23,8 @@ This document is the top-level implementation map for Camille AI Assistance. Det
 9. For Free Plan and Plus Plan trial access, Subscription Plans creates an AI Response Reservation before the provider call. Business Plan bypasses trial-pool consumption.
 10. If the request needs document content, API resolves an AI Transform Source Snapshot through AI Source Query instead of trusting client-sent editor text or reusing document detail reads.
 11. API enforces empty-content and direct-context size limits before calling the provider.
-12. API calls the model provider and streams the Streaming AI Response to the AI Chat Panel.
-13. On valid completed response, API persists the AI Chat Turn and assistant response.
+12. API calls the model provider and streams structured AI Response Block Stream events to the AI Chat Panel.
+13. On valid completed response, API persists the AI Chat Turn, assistant response text, and reconciled AI Response Block Payload.
 14. Subscription Plans converts the reservation into AI Response Consumption after the response reaches a completed persisted state.
 15. If this is the first successful response in a session, the session receives an AI Conversation Title.
 16. The panel keeps conversation sessions grouped by recent activity.
@@ -48,11 +48,11 @@ sequenceDiagram
   API->>Source: Resolve source snapshot when document-aware
   Source-->>API: Title/body projection and source snapshot token
   API->>Provider: Generate response
-  Provider-->>API: Stream tokens
-  API-->>Panel: Streaming AI Response
-  API->>Store: Persist completed turn and assistant response
+  Provider-->>API: Stream raw chunks
+  API-->>Panel: Stream block_start/text_delta/block_end events
+  API->>Store: Persist completed turn, assistant text, and block payload
   API->>Billing: Consume reservation after persistence
-  API-->>Panel: Completed response state
+  API-->>Panel: Completed response state with reconciled block payload
 ```
 
 ## UI States
@@ -67,8 +67,8 @@ sequenceDiagram
 ### Loading And Streaming
 
 - Submitted turn shows generation progress.
-- Streaming AI Response content appears incrementally.
-- Partial streaming text cannot be appended.
+- Structured Streaming AI Response blocks appear incrementally.
+- Partial streaming block previews cannot be appended.
 - Pending response should remain visually distinct from completed persisted assistant messages.
 
 ### Empty
@@ -96,7 +96,7 @@ sequenceDiagram
 - Non-workspace users cannot use Workspace AI Chat.
 - Document-specific collaborators and public viewers cannot use Workspace AI Chat.
 - Attached-document requests fail if the user lacks readable access to any AI Document Attachment.
-- Append action is hidden or unavailable when there is no active editable document route.
+- Append action is hidden when no active document context exists and disabled or unavailable when the active document is not editable.
 - Read-only document access can allow document-aware chat only for workspace members with readable access; it does not allow append.
 
 ## Responsive And Accessibility Notes
@@ -122,11 +122,11 @@ sequenceDiagram
 - [ ] Failed, invalid, canceled, interrupted, size-limit, empty-content, rate-limit, and entitlement-denied outcomes do not consume a trial response.
 - [ ] Exhausted trial pool shows Upgrade Prompt with owner/admin action and member ask-admin copy.
 - [ ] Completed assistant response can be appended only from an active editable document route.
-- [ ] Append converts supported Markdown-lite into basic document blocks and degrades unsupported syntax to plain text.
+- [ ] Append uses the completed backend-normalized response block payload; unsupported provider syntax is normalized or degraded before persistence, and headings are downshifted for document body insertion.
 - [ ] Append creates an AI-Assisted Document Edit with provenance metadata and no raw prompt/source retention.
 - [ ] Append success keeps the panel open and shows success feedback.
 - [ ] Append failure does not create a Document Edit and shows retryable feedback.
-- [ ] Partial streaming response cannot be appended.
+- [ ] Partial streaming block preview cannot be appended.
 - [ ] External collaborators and public viewers cannot use Workspace AI Chat.
 
 ## Subflows

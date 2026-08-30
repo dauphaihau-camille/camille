@@ -21,12 +21,16 @@ One user message and its generated assistant response inside an AI Conversation 
 _Avoid_: Prompt attempt, token event, billing invoice line
 
 **AI Chat Message Content**:
-The persisted user message and assistant response text in an AI Conversation Session.
+The persisted user message text, assistant response text, and completed **AI Response Block Payload** in an AI Conversation Session.
 _Avoid_: Source snapshot, hidden prompt log, provider trace
 
 **Streaming AI Response**:
-An assistant response delivered incrementally to the AI Chat Panel before the full AI Chat Turn is complete.
-_Avoid_: Fake streaming, background job
+An assistant response delivered incrementally as structured block events to the AI Chat Panel before the full AI Chat Turn is complete.
+_Avoid_: Fake streaming, background job, document edit, raw provider token stream
+
+**AI Assistant Message Preview**:
+The read-only AI Chat Panel rendering of assistant response block events during or after a Streaming AI Response.
+_Avoid_: Document Body, embedded editor, editable draft
 
 **AI Conversation Title**:
 A short generated label for an AI Conversation Session.
@@ -60,12 +64,28 @@ _Avoid_: Automatic edit, generated document, full rich document
 The backend-owned workspace endpoint that creates AI Chat Turns and AI Transform Drafts from AI Chat Panel Actions.
 _Avoid_: Browser LLM call, provider proxy, document-only transform endpoint
 
+**AI Response Format Instruction**:
+The backend instruction that asks the AI provider to return clean Markdown suitable for deterministic response normalization.
+_Avoid_: Full editor schema prompt, provider-owned document JSON
+
+**AI Response Normalization**:
+The backend conversion of provider Markdown stream output into supported canonical document block events and a completed canonical block payload.
+_Avoid_: Browser LLM parsing, full rich markdown import, best-effort repair
+
+**AI Response Block Stream**:
+The backend-owned incremental event stream that carries provisional supported document block starts, text deltas, inline marks, block ends, completion, and failures to the AI Chat Panel.
+_Avoid_: Raw provider token stream, editable Document Body mutation, provider-owned document JSON
+
+**AI Response Block Payload**:
+The completed normalized block payload stored with **AI Chat Message Content** and used by **AI Append Action** after stream reconciliation.
+_Avoid_: Provider token events, unreconciled provisional blocks, provider-owned document JSON
+
 **AI Append Action**:
 An assistant-message action labeled "Append to this document" that appends the assistant response content to the end of the current active editable document.
 _Avoid_: Cursor insert, selection replace, automatic edit
 
 **AI Append Block Conversion**:
-The client-side conversion from assistant response text into supported basic document blocks before an AI Append Action writes to the editor.
+The use of a completed **AI Response Block Payload** when an **AI Append Action** writes supported basic document blocks to the editor.
 _Avoid_: Full markdown import, provider-owned document JSON, rich document conversion
 
 **AI Transform Source Snapshot**:
@@ -133,7 +153,7 @@ _Avoid_: Auto-merge, best-effort apply
 - **Workspace AI Chat** belongs to a workspace and can run with zero or more **AI Document Attachments**.
 - An **AI Conversation Session** is persisted at workspace scope and visible only to the user who created it.
 - An **AI Conversation Session** contains one or more **AI Chat Turns**.
-- An **AI Conversation Session** persists **AI Chat Message Content**.
+- An **AI Conversation Session** persists **AI Chat Message Content** as assistant response text plus the completed **AI Response Block Payload**.
 - **AI Chat Message Content** is product state; raw **AI Transform Source Snapshot** text is not retained as chat history.
 - An **AI Conversation Session** starts as untitled and receives an **AI Conversation Title** after the first successful assistant response.
 - An **AI Conversation Title** is generated or derived from the first **AI Chat Turn**, not from an attached document title.
@@ -154,11 +174,16 @@ _Avoid_: Auto-merge, best-effort apply
 - The first AI assistance behavior is invoked through an **AI Chat Panel Action**, not a selection toolbar or document toolbar menu.
 - The workspace-level AI shell hosts the **AI Chat Panel**.
 - **AI Document Context Registration** connects the current document route to the workspace-level **AI Chat Panel** while the document screen is mounted, but the user may remove the resulting **AI Document Attachment**.
-- The first **AI Chat API** streams **Streaming AI Response** content for chat turns.
-- A **Streaming AI Response** consumes Subscription Plans **AI Response Gate** access only when it reaches a valid completed state and is persisted.
+- The first **AI Chat API** streams **Streaming AI Response** block events for chat turns.
+- The **AI Chat API** uses an **AI Response Format Instruction** to ask providers for clean Markdown, not full editor JSON.
+- During generation, the backend performs incremental **AI Response Normalization** and emits an **AI Response Block Stream** to the **AI Chat Panel**.
+- A **Streaming AI Response** is rendered in the **AI Chat Panel** as an **AI Assistant Message Preview**, not as **Document Body** and not through an embedded editor instance.
+- When a **Streaming AI Response** completes, the backend reconciles the provisional **AI Response Block Stream** and persists the completed **AI Response Block Payload** with the assistant response text.
+- **AI Response Normalization** supports Markdown-lite structures such as paragraphs, bullets, numbered lists, headings, and inline emphasis; unsupported syntax is preserved as plain text in supported blocks.
+- A **Streaming AI Response** consumes Subscription Plans **AI Response Gate** access only when it reaches a valid completed state, its text is persisted, and its reconciled **AI Response Block Payload** is available.
 - Interrupted or canceled **Streaming AI Response** output releases or expires its Subscription Plans **AI Response Reservation**.
 - Existing web component names may keep `AiChatPanel` as implementation names because the first release is chat-based.
-- The **AI Chat Panel** shows selectable **AI Conversation Sessions**, optional **AI Document Attachments**, loading, assistant responses, **AI Transform Draft**, **AI Size Limit Notice**, Subscription Plans **AI Trial Counter**, Subscription Plans **Upgrade Prompt**, stale-draft state, apply, copy, and regenerate actions.
+- The **AI Chat Panel** shows selectable **AI Conversation Sessions**, optional **AI Document Attachments**, loading, assistant responses, **AI Assistant Message Preview**, **AI Transform Draft**, **AI Size Limit Notice**, Subscription Plans **AI Trial Counter**, Subscription Plans **Upgrade Prompt**, stale-draft state, apply, copy, and regenerate actions.
 - An **AI Chat API** request identifies the workspace, chat message, current session, and any explicit **AI Document Attachments**; a future translate request will also include **Translation Target Language**.
 - The first **AI Chat API** is workspace/session-scoped and supports explicit document attachments; it is not a workspace RAG endpoint.
 - The **AI Chat API** rechecks workspace membership, document access for each **AI Document Attachment**, checks Subscription Plans **AI Response Gate**, resolves any required **AI Transform Source Snapshot**, enforces the direct-context size limit, records **AI Transform Metadata**, and returns an **AI Transform Draft** or assistant response.
@@ -166,8 +191,8 @@ _Avoid_: Auto-merge, best-effort apply
 - **AI Chat Panel Action** calls the **AI Chat API**; the web client does not call the LLM provider directly.
 - An **AI Append Action** appends the selected assistant response to the end of the currently active document; it does not insert at cursor position or replace the current selection.
 - An **AI Append Action** is available only when the **AI Chat Panel** is hosted from an active editable document route; no active document or read-only access means no append action.
-- **AI Append Block Conversion** converts assistant response text or Markdown-lite into basic document blocks such as paragraphs, bullets, numbered lists, and headings when supported; unsupported syntax degrades to plain text.
-- An **AI Append Action** becomes available only after the assistant message is complete and persisted; partial **Streaming AI Response** text cannot be appended.
+- **AI Append Block Conversion** writes the completed reconciled **AI Response Block Payload** as basic document blocks such as paragraphs, bullets, numbered lists, and headings.
+- An **AI Append Action** becomes available only after the assistant message is complete, persisted, and has a completed reconciled **AI Response Block Payload**; partial **Streaming AI Response** block events cannot be appended.
 - The same assistant message can be appended more than once; each **AI Append Action** is a separate explicit user action.
 - **AI Append Action** does not use **Stale AI Transform Draft** checks because it appends new content rather than replacing source content.
 - **AI Append Action** targets the current active editable document, even if the assistant message originally used a different **AI Document Attachment** as source context.
@@ -201,16 +226,19 @@ _Avoid_: Auto-merge, best-effort apply
 - "Append availability" means active editable document route only, not whether the current message used or still shows a document attachment.
 - "Remove document badge" means remove the document from future **AI Chat Turns**, not rewrite prior turn context.
 - "Append action copy" means "Append to this document", not "Insert into this document".
-- "Append format" means Markdown-lite to basic document blocks, not one plain paragraph, full markdown import, or provider-returned document JSON.
-- "Append during streaming" is rejected; append uses completed persisted assistant messages only.
+- "Append format" means completed reconciled **AI Response Block Payload** produced from Markdown-lite, not one plain paragraph, full markdown import, or provider-returned document JSON.
+- "Append during streaming" is rejected; append uses completed persisted assistant messages with completed reconciled **AI Response Block Payload** only.
 - "Repeat append" means allowed duplicate appends, not disabled after first use.
 - "Append provenance" means session id, assistant message id, action type, actor, and timestamp metadata, not full prompt/source retention.
 - "Append billing" means no additional AI response consumption; billing happened when the assistant response was generated.
 - "Append success feedback" means toast plus unchanged panel state, not closing the panel or auto-scrolling the document.
 - "Append failure" means retryable toast without chat state mutation, not silent disable, blocking dialog, or clipboard fallback.
 - "Summarize document" means produce a short bullet **Summary Shape** from an attached document, not a paragraph, exhaustive recap, or structured report by default.
+- "AI response structure" means backend-owned **AI Response Normalization** into incremental **AI Response Block Stream** events plus a completed reconciled block payload, not asking the provider to generate full editor JSON for every response.
+- "AI provider format" means clean Markdown requested through an **AI Response Format Instruction**, not arbitrary natural-language text or provider-owned document JSON.
+- "Assistant message display" means **AI Assistant Message Preview** rendered read-only from structured block events, not the editable document editor.
 - "AI draft changed underneath" means a **Stale AI Transform Draft** is blocked from applying, not that **AI Append Action** is blocked by document drift.
-- "Streaming AI consumption" means completed persisted assistant response only, not stream start or partial text display.
+- "Streaming AI consumption" means completed persisted assistant response only, not stream start or provisional block event display.
 - "AI response" means a **Streaming AI Response** for an **AI Chat Turn**, not a background job.
 - "AiChatPanel naming" matches the chat-based first release.
 - "AI implementation boundary" means a backend-owned **AI Chat API**, not a web-owned LLM call.
