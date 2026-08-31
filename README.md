@@ -28,6 +28,8 @@ A note-taking web application where you can think, write, and plan.
 - **Optimistic document actions** - common actions update immediately in the UI and roll back if the request fails
 - **Resumable workspace navigation** - the app remembers the user’s last active workspace and expanded document tree state
 - **Multiple sign-in flows** - users can sign up or log in with email codes, Google OAuth, or GitHub OAuth
+- **Workspace AI assistant** - users can chat with Camille AI in a workspace, attach current documents as explicit context, stream structured responses, and append completed AI responses to editable documents
+- **Subscription plans and entitlement gates** - workspace plans control block limits, seat-based billing, checkout/cancellation flows, and AI response access through trial and upgrade gates
 
 For deeper implementation details, see the frontend and backend capability inventories:
 
