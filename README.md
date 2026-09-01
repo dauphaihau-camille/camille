@@ -8,9 +8,9 @@ A note-taking web application where you can think, write, and plan.
 
 | App | Deployed | Local |
 | --- | --- | --- |
-| App | `https://app.camille.hautran.me` | `http://localhost:4000` |
-| Marketing | `https://camille.hautran.me` | `http://localhost:4001` |
-| API Docs | `https://api.camille.hautran.me` | `http://localhost:3000/docs` |
+| App | `https://app.camille.hautran.me` | `http://localhost:5102` |
+| Marketing | `https://camille.hautran.me` | `http://localhost:5101` |
+| API Docs | `https://api.camille.hautran.me` | `http://localhost:5100/docs` |
 
 - [Demo guide](./docs/demo-guide.md) - demo accounts, seed modes, smoke checks, and safe test flows.
 

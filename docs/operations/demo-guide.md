@@ -6,8 +6,8 @@ Use this guide to test Camille demo environments, including deployed demo sites 
 
 | App | Deployed | Local |
 | --- | --- | --- |
-| App | `https://app.camille.hautran.me` | `http://localhost:4000` |
-| Marketing | `https://camille.hautran.me` | `http://localhost:4001` |
+| App | `https://app.camille.hautran.me` | `http://localhost:5102` |
+| Marketing | `https://camille.hautran.me` | `http://localhost:5101` |
 
 ## Suggested Test Accounts
 
@@ -159,5 +159,5 @@ Local-only accounts can be added with `apps/api/seed-data/auth-users.local.tsv` 
 - Email delivery uses the logger or sandbox provider.
 - OAuth callback routes are configured only for the target environment under test.
 - Storage uses local or approved object storage credentials.
-- Queue jobs are visible at `http://localhost:3000/ops/queues` when Bull Board is enabled.
+- Queue jobs are visible at `http://localhost:5100/ops/queues` when Bull Board is enabled.
 - Logs, metrics, and traces are emitted when observability mode is running.

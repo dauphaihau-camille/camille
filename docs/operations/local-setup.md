@@ -22,12 +22,12 @@ git submodule update --init --recursive
 
 | App | URL |
 | --- | --- |
-| API | `http://localhost:3000` |
-| API Docs | `http://localhost:3000/docs` |
-| App | `http://localhost:4000` |
-| Marketing | `http://localhost:4001` |
+| API | `http://localhost:5100` |
+| API Docs | `http://localhost:5100/docs` |
+| App | `http://localhost:5102` |
+| Marketing | `http://localhost:5101` |
 | Grafana | `http://localhost:23001` |
-| Bull Board | `http://localhost:3000/ops/queues` |
+| Bull Board | `http://localhost:5100/ops/queues` |
 
 ## API Setup
 
@@ -42,7 +42,7 @@ just db-migration-up
 just seed-full
 ```
 
-Set `CORS_ALLOWED_ORIGINS=http://localhost:4000,http://localhost:4001` in `api/.env` when testing the local app and marketing site from the browser.
+Set `CORS_ALLOWED_ORIGINS=http://localhost:5102,http://localhost:5101` in `api/.env` when testing the local app and marketing site from the browser.
 
 `just seed-full` clears the database and seeds the committed demo users. For richer document scenarios, use `just db-fresh-realistic`. For large navigation and pagination checks, use `just db-fresh-huge`.
 
@@ -62,11 +62,11 @@ just api-worker-up-observability
 
 Useful local endpoints after startup:
 
-- API docs: `http://localhost:3000/docs`
-- OpenAPI JSON: `http://localhost:3000/docs/openapi.json`
-- Health: `http://localhost:3000/health`
-- Readiness: `http://localhost:3000/health/ready`
-- Queues: `http://localhost:3000/ops/queues`
+- API docs: `http://localhost:5100/docs`
+- OpenAPI JSON: `http://localhost:5100/docs/openapi.json`
+- Health: `http://localhost:5100/health`
+- Readiness: `http://localhost:5100/health/ready`
+- Queues: `http://localhost:5100/ops/queues`
 - Grafana: `http://localhost:23001`
 
 ## Web Setup
@@ -88,7 +88,7 @@ cp apps/marketing/.env.example apps/marketing/.env.local
 Confirm these values point to the local API:
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5100
 NEXT_PUBLIC_API_VERSION=v1
 ```
 
@@ -101,7 +101,7 @@ cd apps/web
 bun run dev:app
 ```
 
-Open `http://localhost:4000`.
+Open `http://localhost:5102`.
 
 Start the marketing site in a separate terminal:
 
@@ -110,7 +110,7 @@ cd apps/web
 bun run dev:marketing
 ```
 
-Open `http://localhost:4001`.
+Open `http://localhost:5101`.
 
 ## Seeded Local Accounts
 
@@ -140,4 +140,4 @@ Optional local-only accounts can be added in `apps/api/seed-data/auth-users.loca
 - Very large local data set: use `just db-fresh-demo` to return to the small demo seed.
 - Port conflicts: stop the existing process or change the app port in the app-specific command or environment.
 - Worker queue errors: confirm Redis is running with `just infra-up` from `apps/api`.
-- Web API request errors: confirm `NEXT_PUBLIC_API_BASE_URL` points to `http://localhost:3000`.
+- Web API request errors: confirm `NEXT_PUBLIC_API_BASE_URL` points to `http://localhost:5100`.
