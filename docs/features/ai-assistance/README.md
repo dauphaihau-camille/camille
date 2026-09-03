@@ -65,6 +65,6 @@ External document collaborators and public viewers are excluded from Workspace A
 - [Subscription Plans Context](../../domain/subscription-plans/CONTEXT.md)
 - [Retain AI Source Snapshots Only As Operational Metadata](../../adr/0003-retain-ai-transform-metadata-only.md)
 - [Use Workspace AI Trial Pool For AI Billing](../../adr/0004-use-workspace-ai-trial-pool-for-ai-billing.md)
-- [Document Edit Flow](../document-edit-flow.md)
-- [Document Undo And Redo Design](../document-undo-redo-design.md)
+- [Document Edit](../document-edit/)
+- [Document Undo And Redo](../document-edit/flows/undo-redo.md)
 - [Demo Guide](../../operations/demo-guide.md)
