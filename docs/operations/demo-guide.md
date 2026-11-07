@@ -6,8 +6,8 @@ Use this guide to test Camille demo environments, including deployed demo sites 
 
 | App | Deployed | Local |
 | --- | --- | --- |
-| App | `https://app.camille.hautran.me` | `http://localhost:5102` |
-| Marketing | `https://camille.hautran.me` | `http://localhost:5101` |
+| App | `https://app.camille.hau.sarl` | `http://localhost:5102` |
+| Marketing | `https://camille.hau.sarl` | `http://localhost:5101` |
 
 ## Suggested Test Accounts
 
