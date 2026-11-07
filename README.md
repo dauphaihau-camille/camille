@@ -68,6 +68,28 @@ This repository is the parent workspace for the Camille project. The application
 - Frontend app: [apps/web](apps/web) - [dauphaihau-camille/web](https://github.com/dauphaihau-camille/web)
 - Backend app: [apps/api](apps/api) - [dauphaihau-camille/api](https://github.com/dauphaihau-camille/api)
 
+## Verification
+
+```bash
+./scripts/verify          # all: api, spec, api-types, web
+./scripts/verify api
+./scripts/verify spec
+./scripts/verify api-types
+./scripts/verify contract
+./scripts/verify web
+```
+
+- `api` runs API lint, typecheck, and unit tests; `web` runs the web monorepo
+  checks.
+- `spec` verifies the committed OpenAPI document and the `api-spec` package
+  copy; `api-types` verifies the generated web types.
+- `contract` checks the OpenAPI document against the last published
+  `@dauphaihau-camille/api-spec` for breaking changes and enforces the semver
+  bump; before the first publication there is no baseline and the check passes.
+- `apps/api/api/openapi.json` is the committed contract.
+  `apps/web/packages/shared/src/api/generated/openapi.d.ts` is generated from
+  it; do not edit the generated types by hand.
+
 ## Setup
 
 ```bash

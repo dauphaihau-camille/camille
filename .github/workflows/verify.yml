@@ -1,0 +1,145 @@
+name: Verify
+
+# The superproject pins apps/api and apps/web by commit. A pin can be stale or
+# internally inconsistent (generated artifacts drifting from the sources at the
+# pinned commits), and nothing in the submodules can detect that. This workflow
+# runs the superproject's own `./scripts/verify` targets against the pinned
+# commits and never writes, commits, or publishes anything.
+#
+# Registry note: `verify api-types` installs @dauphaihau-camille/api-spec from
+# GitHub Packages. A superproject GITHUB_TOKEN can only read it after the
+# package grants dauphaihau-camille/camille access (Packages -> the package ->
+# "Manage access"). Until then, set a repository secret NPM_READ_TOKEN (a token
+# with read:packages for the dauphaihau-camille org); it takes precedence below.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - production
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spec:
+    name: API spec matches the pinned API commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9.3.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.0.0
+          cache: pnpm
+          cache-dependency-path: apps/api/api/pnpm-lock.yaml
+
+      - name: Install API dependencies
+        working-directory: apps/api/api
+        run: pnpm install --frozen-lockfile
+
+      # Regenerates openapi.json from the pinned API source and asserts the
+      # committed document, plus the copy inside packages/api-spec, match it.
+      - name: Verify OpenAPI spec and package copy are current
+        run: ./scripts/verify spec
+
+  api-types:
+    name: Web generated types match the pinned API contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Prefer an explicit read:packages secret; fall back to the built-in token,
+      # which only works once the package grants dauphaihau-camille/camille access.
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_READ_TOKEN || secrets.GITHUB_TOKEN }}
+      REGISTRY_TOKEN_SOURCE: ${{ secrets.NPM_READ_TOKEN && 'NPM_READ_TOKEN' || 'GITHUB_TOKEN' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.13.0
+
+      # Fail with the exact missing grant/secret instead of an opaque E401/E404
+      # from `bun install`. GitHub Packages answers 404, not 403, when the token
+      # simply has no access to the package.
+      #
+      # Before the first publication the package is not pinned in apps/web yet;
+      # in that state `./scripts/verify api-types` checks the generated types
+      # against apps/api/api/openapi.json instead of the registry contract.
+      - name: Detect pinned contract package
+        id: contract
+        shell: bash
+        working-directory: apps/web
+        run: |
+          if grep -q '"@dauphaihau-camille/api-spec"' package.json; then
+            echo "pinned=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pinned=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::@dauphaihau-camille/api-spec is not pinned in apps/web/package.json yet; verifying the generated types against apps/api/api/openapi.json."
+          fi
+
+      - name: Check registry access to @dauphaihau-camille/api-spec
+        if: steps.contract.outputs.pinned == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "::error::The registry credential is empty (resolved from '${REGISTRY_TOKEN_SOURCE}'). Set the repository secret NPM_READ_TOKEN to a token with read:packages for the dauphaihau-camille org, or grant @dauphaihau-camille/api-spec read access to dauphaihau-camille/camille so GITHUB_TOKEN can be used."
+            exit 1
+          fi
+
+          STATUS="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${NODE_AUTH_TOKEN}" \
+            -H "Accept: application/vnd.npm.install-v1+json" \
+            'https://npm.pkg.github.com/@dauphaihau-camille%2Fapi-spec')"
+
+          case "${STATUS}" in
+            200)
+              echo "Credential from ${REGISTRY_TOKEN_SOURCE} can read @dauphaihau-camille/api-spec."
+              ;;
+            401|403|404)
+              if [ "${REGISTRY_TOKEN_SOURCE}" = "NPM_READ_TOKEN" ]; then
+                echo "::error::NPM_READ_TOKEN is set but GitHub Packages denied it for @dauphaihau-camille/api-spec (HTTP ${STATUS}). Verify the token is not expired and carries read:packages for the dauphaihau-camille org (a 404 here means 'no access', not 'no package')."
+              else
+                echo "::error::GITHUB_TOKEN cannot read @dauphaihau-camille/api-spec (HTTP ${STATUS}). Grant the package access to this repository: org dauphaihau-camille -> Packages -> @dauphaihau-camille/api-spec -> Package settings -> Manage access -> add dauphaihau-camille/camille with Read. Alternatively set the repository secret NPM_READ_TOKEN to a token with read:packages for the dauphaihau-camille org."
+              fi
+              exit 1
+              ;;
+            *)
+              echo "::error::Unexpected HTTP ${STATUS} while reading @dauphaihau-camille/api-spec from GitHub Packages with the ${REGISTRY_TOKEN_SOURCE} credential. Check registry availability and the token."
+              exit 1
+              ;;
+          esac
+
+      - name: Install web dependencies
+        working-directory: apps/web
+        run: bun install --frozen-lockfile
+
+      # Regenerates the committed API types from the contract package pinned in
+      # apps/web/bun.lock and asserts they match.
+      - name: Verify generated API types are current
+        run: ./scripts/verify api-types

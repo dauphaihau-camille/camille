@@ -8,8 +8,11 @@ usage() {
 Usage: ./scripts/verify [target]
 
 Targets:
-  all        Run the default API and web verification checks
+  all        Run the default API, contract, and web verification checks
   api        Run NestJS API lint, typecheck, and unit tests
+  spec       Verify the committed OpenAPI document and api-spec package copy
+  api-types  Verify web generated API types match the committed contract
+  contract   Check the OpenAPI document for breaking changes against the base branch
   web        Run web monorepo typecheck, lint, and tests
   app        Run the main web app typecheck
   marketing  Run the marketing app typecheck
@@ -23,6 +26,31 @@ USAGE
 run_api() {
   cd "$ROOT_DIR/apps/api/api"
   pnpm check
+}
+
+run_spec() {
+  cd "$ROOT_DIR/apps/api/api"
+  pnpm spec:generate -- --check
+  pnpm spec:package
+  pnpm spec:package -- --check
+}
+
+run_api_types() {
+  cd "$ROOT_DIR/apps/web"
+  # Before the contract package is published (and in the superproject, where
+  # both submodules are checked out), verify the committed types against the
+  # API's committed spec. Once the package is installed, the check uses the
+  # pinned published contract instead.
+  if [ -d node_modules/@dauphaihau-camille/api-spec ]; then
+    bun run generate:api-types -- --check
+  else
+    API_SPEC_PATH="$ROOT_DIR/apps/api/api/openapi.json" bun run generate:api-types -- --check
+  fi
+}
+
+run_contract() {
+  cd "$ROOT_DIR"
+  node apps/api/api/scripts/check-contract-breaking.mjs
 }
 
 run_web() {
@@ -55,10 +83,21 @@ target="${1:-all}"
 case "$target" in
   all)
     run_api
+    run_spec
+    run_api_types
     run_web
     ;;
   api)
     run_api
+    ;;
+  spec)
+    run_spec
+    ;;
+  api-types)
+    run_api_types
+    ;;
+  contract)
+    run_contract
     ;;
   web)
     run_web
