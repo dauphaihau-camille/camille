@@ -85,24 +85,7 @@ jobs:
       # Fail with the exact missing grant/secret instead of an opaque E401/E404
       # from `bun install`. GitHub Packages answers 404, not 403, when the token
       # simply has no access to the package.
-      #
-      # Before the first publication the package is not pinned in apps/web yet;
-      # in that state `./scripts/verify api-types` checks the generated types
-      # against apps/api/api/openapi.json instead of the registry contract.
-      - name: Detect pinned contract package
-        id: contract
-        shell: bash
-        working-directory: apps/web
-        run: |
-          if grep -q '"@dauphaihau-camille/api-spec"' package.json; then
-            echo "pinned=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "pinned=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::@dauphaihau-camille/api-spec is not pinned in apps/web/package.json yet; verifying the generated types against apps/api/api/openapi.json."
-          fi
-
       - name: Check registry access to @dauphaihau-camille/api-spec
-        if: steps.contract.outputs.pinned == 'true'
         shell: bash
         run: |
           set -euo pipefail
