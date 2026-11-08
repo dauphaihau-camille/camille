@@ -85,7 +85,11 @@ This repository is the parent workspace for the Camille project. The application
   copy; `api-types` verifies the generated web types.
 - `contract` checks the OpenAPI document against the last published
   `@dauphaihau-camille/api-spec` for breaking changes and enforces the semver
-  bump; before the first publication there is no baseline and the check passes.
+  bump. It needs GitHub Packages read access: set `NODE_AUTH_TOKEN` (a token
+  with `read:packages` for `dauphaihau-camille`) and a `~/.npmrc` entry such as
+  `//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`, or point
+  `NPM_CONFIG_USERCONFIG` at a file that contains it. Without credentials the
+  command fails closed with a 401 instead of guessing.
 - `apps/api/api/openapi.json` is the committed contract.
   `apps/web/packages/shared/src/api/generated/openapi.d.ts` is generated from
   it; do not edit the generated types by hand.
