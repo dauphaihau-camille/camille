@@ -30,7 +30,7 @@ concurrency:
 jobs:
   spec:
     name: API spec matches the pinned API commit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -61,7 +61,7 @@ jobs:
 
   api-types:
     name: Web generated types match the pinned API contract
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       # Prefer an explicit read:packages secret; fall back to the built-in token,
