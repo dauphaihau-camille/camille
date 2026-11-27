@@ -25,3 +25,14 @@ Issues and specs are tracked in GitHub Issues for `dauphaihau-camille/camille`. 
 This repo uses a multi-context domain-doc layout: root `CONTEXT-MAP.md`,
 context-specific `CONTEXT.md` files under `docs/domain/`, and root
 `docs/adr/`. See `docs/agents/domain.md`.
+
+### Evidence
+
+After a change verifies, capture the proof its change class requires and
+publish it to the pull request comment. See `docs/agents/evidence.md`.
+
+### Pull requests
+
+PR bodies follow `.github/pull_request_template.md`: Summary, Evidence, Merge
+Danger. The `pr` skill owns that shape; `docs/agents/evidence.md` owns what
+counts as evidence.

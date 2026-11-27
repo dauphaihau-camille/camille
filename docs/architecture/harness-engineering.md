@@ -77,6 +77,20 @@ feature area.
 The purpose is to make the expected verification path obvious from the root
 instead of requiring each agent to rediscover package-specific commands.
 
+### Evidence Capture
+
+`docs/agents/evidence.md` defines what proof a change needs, where the artifacts
+live, and how they reach the pull request:
+
+- required evidence is gated by what the diff touches, not by change size
+- artifacts live outside the repository, indexed by a `MANIFEST.md`
+- the same manifest reports the change in chat and publishes it with
+  `gh pr comment --attach`
+
+Evidence is prose guidance for now. It is deliberately not part of
+`scripts/verify`: verification answers whether the code passes its checks,
+evidence answers whether the change does what was asked.
+
 ### Executable Architecture Checks
 
 Camille's API and web workspaces already have focused prose guidance for source
@@ -106,6 +120,8 @@ For humans using agents on Camille:
 6. Make the smallest scoped change that preserves existing boundaries.
 7. Run the focused verification command, or `./scripts/verify` for cross-area
    work.
+8. Capture the evidence its change class requires, and publish it to the pull
+   request comment from the same `MANIFEST.md`.
 
 ## Maintenance Rules
 
@@ -126,6 +142,7 @@ Camille currently has the first practical harness layer:
 - API and web focused guidance
 - repo-map topics for major feature areas, including AI Assistance
 - root verification commands
+- change-class evidence capture, published to PR comments with `gh`
 
 The next maturity step is to expand executable checks gradually as existing
 architecture rules become stable enough to enforce without noisy failures.
